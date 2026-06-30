@@ -164,6 +164,13 @@ class Database:
     async def cleanup_expired_cache(self):
         await self.execute("DELETE FROM search_cache WHERE expires_at <= datetime('now')")
 
+    async def get_cache_count(self):
+        row = await self.fetch_one("SELECT COUNT(*) as cnt FROM search_cache")
+        return row["cnt"] if row else 0
+
+    async def clear_all_cache(self):
+        await self.execute("DELETE FROM search_cache")
+
     # --- Downloads ---
 
     async def log_download(self, user_id: int, track_title: str, source: str, file_size: int = 0):

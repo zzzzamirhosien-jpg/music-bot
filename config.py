@@ -19,6 +19,13 @@ class BotConfig:
             raise ValueError("OWNER_ID is required")
 
 
+def _safe_int(value: str, default: int = 0) -> int:
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return default
+
+
 def load_config() -> BotConfig:
     try:
         from dotenv import load_dotenv
@@ -30,8 +37,8 @@ def load_config() -> BotConfig:
         bot_token=os.getenv("BOT_TOKEN", ""),
         spotify_client_id=os.getenv("SPOTIFY_CLIENT_ID", ""),
         spotify_client_secret=os.getenv("SPOTIFY_CLIENT_SECRET", ""),
-        owner_id=int(os.getenv("OWNER_ID", "0")),
+        owner_id=_safe_int(os.getenv("OWNER_ID", "0")),
         default_language=os.getenv("DEFAULT_LANGUAGE", "en"),
-        cache_ttl_seconds=int(os.getenv("CACHE_TTL_SECONDS", "3600")),
-        daily_download_limit=int(os.getenv("DAILY_DOWNLOAD_LIMIT", "10")),
+        cache_ttl_seconds=_safe_int(os.getenv("CACHE_TTL_SECONDS", "3600"), 3600),
+        daily_download_limit=_safe_int(os.getenv("DAILY_DOWNLOAD_LIMIT", "10"), 10),
     )

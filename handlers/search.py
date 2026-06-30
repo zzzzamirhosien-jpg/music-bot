@@ -1,20 +1,11 @@
-import json
 from telegram import Update
 from telegram.ext import ContextTypes
 from database import Database
 from utils.i18n import t
-from utils.formatters import format_duration
 from keyboards.inline import (
-    language_keyboard,
     source_keyboard,
     results_keyboard,
-    back_button,
     join_channel_keyboard,
-    admin_main_keyboard,
-    admin_settings_keyboard,
-    admin_channels_keyboard,
-    admin_users_keyboard,
-    admin_broadcast_keyboard,
 )
 from services.cache import get_or_search
 
@@ -27,11 +18,6 @@ async def callback_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
     db: Database = context.bot_data["db"]
     user_row = await db.get_user(query.from_user.id)
     lang = user_row["language"] if user_row else "en"
-
-    if data.startswith("lang:"):
-        from handlers.start import set_language
-        await set_language(update, context)
-        return
 
     if data.startswith("src:"):
         source = data.split(":")[1]
@@ -77,14 +63,9 @@ async def callback_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await download_callback(update, context)
         return
 
-    if data == "check_join":
+    if data == "action:check_join":
         from handlers.download import check_join_callback
         await check_join_callback(update, context)
-        return
-
-    if data.startswith("admin:"):
-        from handlers.admin import admin_callback_router
-        await admin_callback_router(update, context)
         return
 
 

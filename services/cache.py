@@ -1,6 +1,6 @@
 import hashlib
 import json
-from typing import List, Optional
+from typing import List
 from services.music_engine import MusicEngine, TrackResult
 
 

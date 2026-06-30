@@ -48,19 +48,12 @@ def results_keyboard(results: list, page: int, per_page: int = 5, source: str = 
     return InlineKeyboardMarkup(buttons)
 
 
-def confirm_download_keyboard(track_id: str, source: str) -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup([
-        [InlineKeyboardButton("⬇️ Download MP3", callback_data=f"dl:{track_id}:{source}")],
-        [InlineKeyboardButton("🔙 Back to Results", callback_data="action:back")],
-    ])
-
-
 def join_channel_keyboard(channels: list) -> InlineKeyboardMarkup:
     buttons = []
     for ch in channels:
-        username = ch["channel_name"]
+        username = ch.get("channel_name") or str(ch.get("channel_id", ""))
         buttons.append([InlineKeyboardButton(f"📢 Join @{username}", url=f"https://t.me/{username}")])
-    buttons.append([InlineKeyboardButton("✅ I Joined", callback_data="check_join")])
+    buttons.append([InlineKeyboardButton("✅ I Joined", callback_data="action:check_join")])
     return InlineKeyboardMarkup(buttons)
 
 

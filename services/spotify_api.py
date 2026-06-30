@@ -1,5 +1,5 @@
 import asyncio
-from typing import List, Dict, Optional
+from typing import List, Dict
 
 try:
     import spotipy

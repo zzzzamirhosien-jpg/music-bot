@@ -1,6 +1,5 @@
 import asyncio
 import os
-import tempfile
 import hashlib
 from dataclasses import dataclass
 from typing import List, Optional

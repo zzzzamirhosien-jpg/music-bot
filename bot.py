@@ -1,4 +1,3 @@
-import asyncio
 import logging
 from telegram.ext import (
     ApplicationBuilder,
@@ -61,16 +60,17 @@ def main():
 
     from handlers.start import start, set_language
     from handlers.search import search_handler
-    from handlers.callbacks import callback_router
+    from handlers.search import callback_router
     from handlers.admin import admin_command, admin_callback_router, admin_text_handler
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("admin", admin_command))
 
     app.add_handler(CallbackQueryHandler(set_language, pattern=r"^lang:"))
-    app.add_handler(CallbackQueryHandler(callback_router, pattern=r"^(src:|action:|dl:|pg:|check_join|noop)"))
+    app.add_handler(CallbackQueryHandler(callback_router, pattern=r"^(src:|action:|dl:|pg:|noop)"))
     app.add_handler(CallbackQueryHandler(admin_callback_router, pattern=r"^admin:"))
 
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, admin_text_handler))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, search_handler))
 
     app.job_queue.run_repeating(cache_cleanup_job, interval=3600, first=300)

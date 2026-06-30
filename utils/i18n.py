@@ -56,6 +56,13 @@ translations = {
         "not_admin": "❌ You are not an admin.",
         "already_admin": "❌ User is already an admin.",
         "searching": "🔍 Searching...",
+        "set_welcome_en_prompt": "📝 Send the welcome message in English:",
+        "set_welcome_fa_prompt": "📝 Send the welcome message in Persian:",
+        "welcome_en_updated": "✅ Welcome message (EN) updated.",
+        "welcome_fa_updated": "✅ Welcome message (FA) updated.",
+        "limit_invalid": "❌ Send a positive number.",
+        "admin_ads_detail": "📝 <b>Ad Management</b>\n\nEN: {ad_en}\n\nFA: {ad_fa}",
+        "admin_cache_detail": "🔄 Cache: {count} entries\n\nClear all cached search results?",
     },
     "fa": {
         "welcome": "🎵 <b>به ربات موزیک خوش آمدید!</b>\n\nنام آهنگ را بفرستید تا برایتان پیدا کنم.\n\n🔍 <b>جستجو</b> — نام آهنگ را تایپ کنید\n🔥 <b>محبوب</b> — دانلودهای پرطرفدار\n🌐 <b>زبان</b> — تغییر زبان",
@@ -114,6 +121,13 @@ translations = {
         "not_admin": "❌ شما مدیر نیستید.",
         "already_admin": "❌ کاربر قبلاً مدیر است.",
         "searching": "🔍 در حال جستجو...",
+        "set_welcome_en_prompt": "📝 متن پیام خوش‌آمدگویی انگلیسی را بفرستید:",
+        "set_welcome_fa_prompt": "📝 متن پیام خوش‌آمدگویی فارسی را بفرستید:",
+        "welcome_en_updated": "✅ پیام خوش‌آمدگویی (EN) به‌روز شد.",
+        "welcome_fa_updated": "✅ پیام خوش‌آمدگویی (FA) به‌روز شد.",
+        "limit_invalid": "❌ یک عدد مثبت ارسال کنید.",
+        "admin_ads_detail": "📝 <b>مدیریت تبلیغات</b>\n\nEN: {ad_en}\n\nFA: {ad_fa}",
+        "admin_cache_detail": "🔄 کش: {count} ورودی\n\nتمام نتایج کش شده پاک شود؟",
     },
 }
 

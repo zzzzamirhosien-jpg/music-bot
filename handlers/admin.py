@@ -1,4 +1,4 @@
-from telegram import Update
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ContextTypes
 from database import Database
 from utils.i18n import t
@@ -86,12 +86,12 @@ async def admin_callback_router(update: Update, context: ContextTypes.DEFAULT_TY
 
     if data == "admin:set_welcome_en":
         context.user_data["admin_action"] = "set_welcome_en"
-        await query.edit_message_text("📝 Send the welcome message in English:")
+        await query.edit_message_text(t("set_welcome_en_prompt", "en"))
         return
 
     if data == "admin:set_welcome_fa":
         context.user_data["admin_action"] = "set_welcome_fa"
-        await query.edit_message_text("📝 Send the welcome message in Persian:")
+        await query.edit_message_text(t("set_welcome_fa_prompt", "en"))
         return
 
     if data == "admin:set_ad_en":
@@ -152,6 +152,7 @@ async def admin_callback_router(update: Update, context: ContextTypes.DEFAULT_TY
         users = await db.get_all_users()
         await query.edit_message_reply_markup(reply_markup=admin_users_keyboard(users))
         await query.answer(f"User {uid} banned")
+        return
 
     if data.startswith("admin:unban:"):
         uid = int(data.split(":")[2])
@@ -160,12 +161,13 @@ async def admin_callback_router(update: Update, context: ContextTypes.DEFAULT_TY
         users = await db.get_all_users()
         await query.edit_message_reply_markup(reply_markup=admin_users_keyboard(users))
         await query.answer(f"User {uid} unbanned")
+        return
 
     if data == "admin:ads":
         from keyboards.inline import back_button
         ad_en = await db.get_setting("ad_text_en") or "(not set)"
         ad_fa = await db.get_setting("ad_text_fa") or "(not set)"
-        text = f"📝 <b>Ad Management</b>\n\nEN: {ad_en}\n\nFA: {ad_fa}"
+        text = t("admin_ads_detail", "en", ad_en=ad_en, ad_fa=ad_fa)
         await query.edit_message_text(text, parse_mode="HTML", reply_markup=back_button())
         context.user_data["admin_action"] = None
         return
@@ -198,12 +200,9 @@ async def admin_callback_router(update: Update, context: ContextTypes.DEFAULT_TY
         return
 
     if data == "admin:cache":
-        db_conn = db.conn
-        cursor = await db_conn.execute("SELECT COUNT(*) as cnt FROM search_cache")
-        row = await cursor.fetchone()
-        count = row["cnt"] if row else 0
+        count = await db.get_cache_count()
         await query.edit_message_text(
-            f"🔄 Cache: {count} entries\n\nClear all cached search results?",
+            t("admin_cache_detail", "en", count=count),
             parse_mode="HTML",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("🗑 Clear All", callback_data="admin:cache_clear")],
@@ -213,10 +212,7 @@ async def admin_callback_router(update: Update, context: ContextTypes.DEFAULT_TY
         return
 
     if data == "admin:cache_clear":
-        await db.cleanup_expired_cache()
-        db_conn = db.conn
-        await db_conn.execute("DELETE FROM search_cache")
-        await db_conn.commit()
+        await db.clear_all_cache()
         await query.edit_message_text(t("cache_cleared", "en"))
         return
 
@@ -235,26 +231,32 @@ async def admin_text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return
 
     text = update.message.text.strip()
+    handled = False
 
     if action == "set_limit":
         if text.isdigit() and int(text) > 0:
             await db.set_setting("daily_limit", text)
             await update.message.reply_text(t("limit_set", "en", limit=text))
+            handled = True
         else:
-            await update.message.reply_text("❌ Send a positive number.")
+            await update.message.reply_text(t("limit_invalid", "en"))
 
     elif action == "set_welcome_en":
         await db.set_setting("welcome_en", text)
-        await update.message.reply_text("✅ Welcome message (EN) updated.")
+        await update.message.reply_text(t("welcome_en_updated", "en"))
+        handled = True
     elif action == "set_welcome_fa":
         await db.set_setting("welcome_fa", text)
-        await update.message.reply_text("✅ Welcome message (FA) updated.")
+        await update.message.reply_text(t("welcome_fa_updated", "en"))
+        handled = True
     elif action == "set_ad_en":
         await db.set_setting("ad_text_en", text)
         await update.message.reply_text(t("ad_set", "en"))
+        handled = True
     elif action == "set_ad_fa":
         await db.set_setting("ad_text_fa", text)
         await update.message.reply_text(t("ad_set", "en"))
+        handled = True
 
     elif action == "add_channel":
         channel_name = text.lstrip("@")
@@ -262,13 +264,16 @@ async def admin_text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
             chat = await context.bot.get_chat(f"@{channel_name}")
             await db.add_channel(chat.id, channel_name)
             await update.message.reply_text(t("channel_added", "en", channel=channel_name))
+            handled = True
         except Exception:
             try:
                 chat = await context.bot.get_chat(int(text))
                 await db.add_channel(chat.id, str(chat.id))
                 await update.message.reply_text(t("channel_added", "en", channel=str(chat.id)))
+                handled = True
             except Exception:
                 await update.message.reply_text(t("channel_not_found", "en"))
+                handled = True
 
     elif action == "broadcast":
         context.user_data["broadcast_message"] = text
@@ -278,5 +283,7 @@ async def admin_text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
             t("broadcast_confirm", "en", count=len(users)),
             reply_markup=admin_broadcast_keyboard(len(users)),
         )
+        handled = True
 
-    context.user_data["admin_action"] = None
+    if handled:
+        context.user_data["admin_action"] = None
